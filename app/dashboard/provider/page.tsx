@@ -28,6 +28,12 @@ type ThreadRow = {
   subject: string | null;
 };
 
+const statusStyles: Record<string, string> = {
+  pending: "bg-amber-400/10 text-amber-200 border-amber-300/35",
+  delivered: "bg-emerald-400/10 text-emerald-200 border-emerald-300/35",
+  failed: "bg-red-400/10 text-red-200 border-red-300/35"
+};
+
 function formatDateTime(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -75,60 +81,92 @@ export default async function ProviderDashboardPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="space-y-1">
-        <h2 className="text-xl font-semibold">Provider Dashboard</h2>
-        <p className="text-sm text-slate-600">Track queue, schedule, and reminder delivery outcomes.</p>
+      <header className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Provider View</p>
+        <h2 className="text-2xl font-semibold text-white">Provider Dashboard</h2>
+        <p className="text-sm text-slate-300">Track queue, schedule, and reminder delivery outcomes.</p>
       </header>
 
+      <div className="grid gap-4 sm:grid-cols-3">
+        <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Upcoming</p>
+          <p className="mt-2 text-2xl font-semibold text-cyan-200">{appointments.length}</p>
+          <p className="text-xs text-slate-400">Appointments</p>
+        </article>
+        <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Queue</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-200">{queueThreads.length}</p>
+          <p className="text-xs text-slate-400">Recent threads</p>
+        </article>
+        <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Deliveries</p>
+          <p className="mt-2 text-2xl font-semibold text-amber-200">{reminderStatuses.length}</p>
+          <p className="text-xs text-slate-400">Latest reminders</p>
+        </article>
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-3">
-        <section className="rounded-xl border p-4">
-          <h3 className="text-base font-semibold">Message Queue</h3>
-          <ul className="mt-3 space-y-2">
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
+          <h3 className="text-base font-semibold text-white">Message Queue</h3>
+          <ul className="mt-3 space-y-2.5">
             {queueThreads.length === 0 ? (
-              <li className="rounded-md bg-slate-50 p-3 text-sm text-slate-600">No recent conversation activity.</li>
+              <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-400">
+                No recent conversation activity.
+              </li>
             ) : (
               queueThreads.map((thread) => (
-                <li className="rounded-md border p-3" key={thread.id}>
-                  <p className="text-sm font-medium">{thread.subject ?? "Patient conversation"}</p>
-                  <p className="text-xs text-slate-500">Updated {formatDateTime(thread.updated_at)}</p>
+                <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3.5" key={thread.id}>
+                  <p className="text-sm font-medium text-slate-100">{thread.subject ?? "Patient conversation"}</p>
+                  <p className="text-xs text-slate-400">Updated {formatDateTime(thread.updated_at)}</p>
                 </li>
               ))
             )}
           </ul>
         </section>
 
-        <section className="rounded-xl border p-4">
-          <h3 className="text-base font-semibold">Upcoming Schedule</h3>
-          <ul className="mt-3 space-y-2">
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
+          <h3 className="text-base font-semibold text-white">Upcoming Schedule</h3>
+          <ul className="mt-3 space-y-2.5">
             {appointments.length === 0 ? (
-              <li className="rounded-md bg-slate-50 p-3 text-sm text-slate-600">No upcoming appointments.</li>
+              <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-400">
+                No upcoming appointments.
+              </li>
             ) : (
               appointments.map((appointment) => (
-                <li className="rounded-md border p-3" key={appointment.id}>
-                  <p className="text-sm font-medium">
+                <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3.5" key={appointment.id}>
+                  <p className="text-sm font-medium text-slate-100">
                     {formatDateTime(appointment.starts_at)} - {formatDateTime(appointment.ends_at)}
                   </p>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">{appointment.status}</p>
-                  <p className="text-xs text-slate-500">Patient {appointment.patient_id.slice(0, 8)}</p>
+                  <p className="text-xs uppercase tracking-wide text-cyan-200">{appointment.status}</p>
+                  <p className="text-xs text-slate-400">Patient {appointment.patient_id.slice(0, 8)}</p>
                 </li>
               ))
             )}
           </ul>
         </section>
 
-        <section className="rounded-xl border p-4">
-          <h3 className="text-base font-semibold">Reminder Status</h3>
-          <ul className="mt-3 space-y-2">
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
+          <h3 className="text-base font-semibold text-white">Reminder Status</h3>
+          <ul className="mt-3 space-y-2.5">
             {reminderStatuses.length === 0 ? (
-              <li className="rounded-md bg-slate-50 p-3 text-sm text-slate-600">No reminder delivery records.</li>
+              <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-400">
+                No reminder delivery records.
+              </li>
             ) : (
               reminderStatuses.map((delivery) => (
-                <li className="rounded-md border p-3" key={delivery.id}>
-                  <p className="text-sm font-medium">
-                    {delivery.channel.toUpperCase()} - {delivery.status}
+                <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3.5" key={delivery.id}>
+                  <p className="text-sm font-medium text-slate-100">{delivery.channel.toUpperCase()}</p>
+                  <p className="mt-1">
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ${
+                        statusStyles[delivery.status] ?? "bg-slate-800 text-slate-200 border-slate-700"
+                      }`}
+                    >
+                      {delivery.status}
+                    </span>
                   </p>
-                  <p className="text-xs text-slate-500">Requested {formatDateTime(delivery.requested_at)}</p>
-                  {delivery.destination ? <p className="text-xs text-slate-500">{delivery.destination}</p> : null}
+                  <p className="mt-2 text-xs text-slate-400">Requested {formatDateTime(delivery.requested_at)}</p>
+                  {delivery.destination ? <p className="text-xs text-slate-400">{delivery.destination}</p> : null}
                 </li>
               ))
             )}
