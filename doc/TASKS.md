@@ -15,8 +15,8 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [x] `2026-03-14 12:23` Implement Supabase Auth + protected dashboard layout gate in Next.js App Router
 - [x] `2026-03-14 12:42` Implement messaging endpoints via Next.js Route Handlers (`app/api/messages/*`)
 - [x] `2026-03-14 12:45` Implement secure inbound SMS webhook + outbound SMS send flow for true two-way patient/provider messaging
-- [ ] Implement appointment endpoints via Next.js Route Handlers (`app/api/appointments/*`)
-- [ ] Implement real-time appointment availability slot calculation + booking conflict prevention in Supabase
+- [x] `2026-03-14 12:49` Implement appointment endpoints via Next.js Route Handlers (`app/api/appointments/*`)
+- [x] `2026-03-14 12:50` Implement real-time appointment availability slot calculation + booking conflict prevention in Supabase
 - [ ] Implement automated appointment confirmation notifications on successful booking
 - [ ] Implement reminder generation workflow (`app/api/reminders/*`)
 - [ ] Implement configurable reminder preferences and channel selection (SMS/email/voice) per patient

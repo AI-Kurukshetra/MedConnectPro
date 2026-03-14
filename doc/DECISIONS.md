@@ -55,3 +55,11 @@
 ## 2026-03-14 - SMS Webhook Security Uses Signed Raw Payload + Timestamp Window
 - Decision: Require `x-medconnect-signature` (HMAC-SHA256 hex over `<timestamp>.<raw_body>`) and `x-medconnect-timestamp` on inbound SMS webhook requests, validated server-side before any DB write.
 - Rationale: Prevents spoofed/replayed inbound SMS payloads while keeping provider integration transport-agnostic for MVP.
+
+## 2026-03-14 - Appointment API Uses Conflict-Driven Booking Validation
+- Decision: Implement booking/edit endpoints directly on `appointments` table and surface DB exclusion-constraint conflicts as API-level `409` responses.
+- Rationale: Keeps availability integrity centralized in Postgres and avoids divergent conflict logic between API and schema.
+
+## 2026-03-14 - Availability Calculation Uses Booked-Range Exclusion
+- Decision: Compute available appointment slots in API by generating a provider/day slot grid and excluding overlaps against existing `scheduled` and `confirmed` rows.
+- Rationale: Delivers deterministic real-time availability for MVP without introducing background schedulers or additional infrastructure.

@@ -27,3 +27,6 @@
 - feat(api): Added secure inbound SMS webhook endpoint at `app/api/messages/inbound/sms` with HMAC signature + timestamp verification and admin-client persistence flow.
 - feat(api): Added outbound SMS send endpoint at `app/api/messages/send/sms` with provider dispatch, message persistence, and notification delivery tracking.
 - feat(config): Added server-side Supabase admin helper and SMS env typings (`SUPABASE_SERVICE_ROLE_KEY`, `SMS_WEBHOOK_SECRET`, provider config vars).
+- feat(api): Added appointment endpoints at `app/api/appointments` and `app/api/appointments/[appointmentId]` for authenticated list/create/read/update flows.
+- fix(api): Mapped provider slot overlap constraint errors (`appointments_provider_no_overlap`) to HTTP 409 conflict responses.
+- feat(api): Added `GET /api/appointments/availability` real-time slot endpoint with provider/day filtering and overlap-aware slot generation.
