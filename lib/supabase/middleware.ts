@@ -2,7 +2,16 @@ import { createServerClient } from "@supabase/ssr";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const protectedPrefixes = ["/dashboard"];
+const AUTH_TIMEOUT_MS = 8000;
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("auth_timeout")), timeoutMs);
+    })
+  ]);
+}
 
 export async function updateSession(request: NextRequest) {
   const response = NextResponse.next({
@@ -31,17 +40,10 @@ export async function updateSession(request: NextRequest) {
     }
   });
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  const isProtectedPath = protectedPrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix));
-
-  if (isProtectedPath && !user) {
-    const loginUrl = new URL("/login", request.url);
-    const requestedPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-    loginUrl.searchParams.set("next", requestedPath);
-    return NextResponse.redirect(loginUrl);
+  try {
+    await withTimeout(supabase.auth.getSession(), AUTH_TIMEOUT_MS);
+  } catch {
+    return response;
   }
 
   return response;
