@@ -27,10 +27,10 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [x] `2026-03-14 12:59` Implement one EHR integration adapter endpoint (`app/api/integrations/ehr/*`)
 - [x] `2026-03-14 12:59` Implement minimal EHR data sync mapping for appointments and patient communication events
 - [x] `2026-03-14 13:01` Implement multi-channel notification pipeline route handlers (`app/api/notifications/*`) for SMS, email, voice, and push
-- [ ] Set up Vitest test runner and add `pnpm test` script
-- [ ] Add unit tests for Zod schemas and route handlers
-- [ ] Add E2E test for core journey: login -> book -> reminder -> message reply
-- [ ] Run checks (`pnpm lint`, `pnpm typecheck`, `pnpm build`) and full test suite once test scripts exist
+- [x] `2026-03-14 13:54` Set up Vitest test runner and add `pnpm test` script
+- [x] `2026-03-14 14:02` Add unit tests for Zod schemas and route handlers
+- [x] `2026-03-14 13:54` Add E2E test for core journey: login -> book -> reminder -> message reply
+- [x] `2026-03-14 13:54` Run checks (`pnpm lint`, `pnpm typecheck`, `pnpm build`) and full test suite once test scripts exist
 
 ## Stack Guardrails (Non-Negotiable)
 - [ ] No Express or standalone Node backend server introduced

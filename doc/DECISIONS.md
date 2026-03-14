@@ -87,3 +87,11 @@
 ## 2026-03-14 - Notification Pipeline Uses Queue + Dispatcher Endpoints
 - Decision: Split notification handling into enqueue/list (`/api/notifications`) and delivery processing (`/api/notifications/dispatch`) endpoints with channel-specific dispatch behavior.
 - Rationale: Supports multi-channel MVP messaging while allowing later replacement of mocked channel providers without API contract changes.
+
+## 2026-03-14 - Testing Baseline Uses Vitest + Route-Level Unit Coverage
+- Decision: Establish lightweight test baseline with Vitest and prioritize unit tests on shared validation/security logic plus API handler auth/validation behavior.
+- Rationale: Delivers fast confidence gates in the hackathon timeline while E2E infrastructure is still being wired.
+
+## 2026-03-14 - Introduce Zod Schemas for Reminder Payload Validation
+- Decision: Add dedicated Zod schema module for reminder generation and preference payloads, with tests asserting valid/invalid parse behavior.
+- Rationale: Aligns with project validation standards and provides a stable schema surface for API handlers and future form integration.

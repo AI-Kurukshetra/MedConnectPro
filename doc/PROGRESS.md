@@ -21,3 +21,6 @@
 [2026-03-14 12:58] codex — Added API-level HIPAA audit logging helper and integrated audit event writes into appointment booking and message creation/inbound/outbound SMS flows.
 [2026-03-14 12:59] codex — Added EHR integration adapter routes: connection management (`/api/integrations/ehr/connection`) and sync event enqueueing (`/api/integrations/ehr/sync`) with minimal appointment/message payload mapping.
 [2026-03-14 13:01] codex — Added multi-channel notification pipeline routes (`/api/notifications`, `/api/notifications/dispatch`) for queueing, listing, and dispatching pending SMS/email/voice/push/in-app notifications with provider/status updates.
+[2026-03-14 13:54] codex — Added Vitest test runner setup (`pnpm test`, `vitest.config.ts`), added unit tests for appointment validation + SMS signature and an appointments availability route handler test, added E2E core-journey Playwright spec scaffold, and ran lint/typecheck/test/build successfully.
+[2026-03-14 13:58] codex — Retried `zod` dependency installation for Zod-schema test coverage; blocked by npm registry DNS resolution (`ENOTFOUND`), logged in `doc/BLOCKERS.md`.
+[2026-03-14 14:02] codex — Installed `zod`, added reminder-related Zod schemas and unit tests, re-ran full quality gates (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`) successfully, and cleared testing blocker state.

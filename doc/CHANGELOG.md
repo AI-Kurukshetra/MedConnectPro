@@ -40,3 +40,7 @@
 - feat(api): Added EHR adapter endpoints at `app/api/integrations/ehr/connection` and `app/api/integrations/ehr/sync`.
 - feat(api): Added minimal EHR payload mapping for appointment and communication events before enqueueing `ehr_sync_events`.
 - feat(api): Added notification pipeline endpoints at `app/api/notifications` and `app/api/notifications/dispatch` for queueing and dispatch across SMS/email/voice/push/in-app channels.
+- test(config): Added Vitest config and `pnpm test` / `pnpm test:watch` scripts.
+- test(unit): Added unit tests for appointment validation logic, SMS webhook signature verification, and appointment availability route auth/validation handling.
+- test(e2e): Added Playwright core-journey spec scaffold at `tests/e2e/core-journey.spec.js`.
+- test(schema): Added Zod reminder validation schemas and corresponding unit tests.
