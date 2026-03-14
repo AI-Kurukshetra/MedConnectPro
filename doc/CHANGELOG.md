@@ -10,3 +10,4 @@
 - docs(decisions): Added stack-constraint and no-standalone-backend architecture decisions.
 
 - docs(tasks): Expanded MVP checklist to fully cover all 9 must-have features from required feature source of truth.
+- feat(config): Scaffolded project baseline with Next.js App Router, TypeScript strict config, TailwindCSS, Supabase SSR/browser clients, middleware auth gate, and starter app/pages.

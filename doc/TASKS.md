@@ -5,6 +5,7 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 ## Session Bootstrap
 - [x] `2026-03-14 10:59` Initialize `/doc` system from AGENTS + BLUEPRINT with MVP-only scope
 - [x] `2026-03-14 11:02` Refactor docs to enforce required stack only (Next.js + Supabase + Vercel + TypeScript + TailwindCSS)
+- [x] `2026-03-14 11:40` Scaffold initial Next.js App Router architecture with Tailwind + Supabase client setup and core directories
 
 ## MVP Delivery Plan (Must-Have)
 - [ ] Finalize Supabase MVP schema + RLS SQL in `doc/SCHEMA.md` for dashboard execution

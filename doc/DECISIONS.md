@@ -23,3 +23,7 @@
 ## 2026-03-14 - TASKS Backlog Extended to Full Feature Coverage
 - Decision: Add explicit MVP tasks for partially covered features (two-way SMS transport flow, real-time availability + confirmations, configurable reminders, HIPAA safeguards, mass broadcast tooling, multi-channel notifications, and EHR sync mapping).
 - Rationale: Existing backlog had feature-level intent but missed several implementation-critical tasks required to claim full coverage of all 9 must-have features.
+
+## 2026-03-14 - Start with Architecture-Only Scaffold
+- Decision: Generate only foundational project structure, configuration, and Supabase client/auth plumbing; defer all business features.
+- Rationale: Preserves momentum and de-risks setup while keeping MVP feature implementation in explicit backlog tasks.
