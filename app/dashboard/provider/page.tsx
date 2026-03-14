@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { requireUser } from "@/lib/auth/session";
+import { requireProviderUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Provider Dashboard | MedConnect Pro"
@@ -49,7 +49,7 @@ function formatDateTime(value: string): string {
 }
 
 export default async function ProviderDashboardPage() {
-  const user = await requireUser();
+  const { user } = await requireProviderUser();
   const supabase = await createClient();
 
   const nowIso = new Date().toISOString();

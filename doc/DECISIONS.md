@@ -111,3 +111,7 @@
 ## 2026-03-14 - Move to Next.js 16 Security Baseline
 - Decision: Upgrade framework tooling to `next@16.1.6` and `eslint-config-next@16.1.6`, and replace `next lint` with flat ESLint execution (`eslint .`) for compatibility.
 - Rationale: Clears Vercel vulnerability enforcement (`CVE-2025-66478`) while preserving quality gates (`lint`, `typecheck`, `build`) under the current toolchain.
+
+## 2026-03-14 - Dashboard Routes Enforce User Role
+- Decision: Gate dashboard routes by `profiles.role` in server components: `patient` users can access only `/dashboard/patient`, while `provider|staff|admin` users can access only `/dashboard/provider`; root `/dashboard` renders a single role-appropriate entry card.
+- Rationale: Aligns runtime behavior with PRD role-based access requirements and prevents cross-workflow navigation for unauthorized roles.

@@ -29,3 +29,4 @@
 [2026-03-14 15:23] codex — Stabilized login/session flow for Supabase latency: removed login-page auth precheck, made middleware session refresh non-blocking, and added retry+timeout handling in sign-in and server-side `requireUser`; lint/typecheck pass.
 [2026-03-14 15:33] codex — Added project-local frontend skill scaffolding (`.agents/skills/frontend-design`, `.codex/agents/frontend.toml`, `.codex/config.toml`) and redesigned `app/page.tsx` into a polished responsive landing page; lint/typecheck pass.
 [2026-03-14 16:55] codex — Upgraded `next`/`eslint-config-next` to `16.1.6`, migrated lint to flat ESLint config, and verified `pnpm lint`, `pnpm typecheck`, and `pnpm build` pass.
+[2026-03-14 17:35] codex — Implemented role-gated dashboard routing: patient users now see only patient entry card and are redirected away from `/dashboard/provider`; provider/staff/admin users are redirected away from `/dashboard/patient`; `pnpm typecheck` pass.

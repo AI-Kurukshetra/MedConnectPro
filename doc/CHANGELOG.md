@@ -53,3 +53,4 @@
 - feat(ui): Replaced root landing screen with a clean, responsive hero layout featuring product positioning, CTA actions, and feature snapshot cards.
 - fix(config): Upgraded `next` and `eslint-config-next` from `15.3.1` to `16.1.6` to remediate Vercel-reported vulnerable Next.js version (`CVE-2025-66478`).
 - chore(config): Switched lint script from `next lint` to `eslint .` and added flat config (`eslint.config.mjs`) for ESLint 9 + Next 16 compatibility.
+- fix(auth): Added role guard helpers in `lib/auth/session.ts` and enforced role-based dashboard access on `app/dashboard`, `app/dashboard/patient`, and `app/dashboard/provider` so patient users cannot access provider workflow routes.

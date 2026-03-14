@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { requireUser } from "@/lib/auth/session";
+import { requirePatientUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Patient Portal | MedConnect Pro"
@@ -40,7 +40,7 @@ function formatDateTime(value: string): string {
 }
 
 export default async function PatientPortalPage() {
-  const user = await requireUser();
+  const { user } = await requirePatientUser();
   const supabase = await createClient();
 
   const { data: patient } = await supabase.from("patients").select("id").eq("profile_id", user.id).maybeSingle();
