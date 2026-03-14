@@ -95,3 +95,7 @@
 ## 2026-03-14 - Introduce Zod Schemas for Reminder Payload Validation
 - Decision: Add dedicated Zod schema module for reminder generation and preference payloads, with tests asserting valid/invalid parse behavior.
 - Rationale: Aligns with project validation standards and provides a stable schema surface for API handlers and future form integration.
+
+## 2026-03-14 - Seed Data Lives in SCHEMA Doc for Dashboard Execution
+- Decision: Provide manual QA seed SQL directly in `doc/SCHEMA.md` (instead of CLI seed tooling) using auth-email lookups and idempotent inserts.
+- Rationale: Matches the hackathon constraint of dashboard-first Supabase operations and enables repeatable demo data setup without local infra tooling.

@@ -24,3 +24,5 @@
 [2026-03-14 13:54] codex — Added Vitest test runner setup (`pnpm test`, `vitest.config.ts`), added unit tests for appointment validation + SMS signature and an appointments availability route handler test, added E2E core-journey Playwright spec scaffold, and ran lint/typecheck/test/build successfully.
 [2026-03-14 13:58] codex — Retried `zod` dependency installation for Zod-schema test coverage; blocked by npm registry DNS resolution (`ENOTFOUND`), logged in `doc/BLOCKERS.md`.
 [2026-03-14 14:02] codex — Installed `zod`, added reminder-related Zod schemas and unit tests, re-ran full quality gates (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`) successfully, and cleared testing blocker state.
+[2026-03-14 14:20] codex — Added an idempotent manual QA seed SQL section to `doc/SCHEMA.md` covering provider/patient/org setup, demo appointments/messages/reminders/notifications, and EHR sync seed data with verification queries.
+[2026-03-14 14:22] codex — Fixed seed SQL PL/pgSQL ambiguity by switching demo variables to `v_*` names, restored table column names, and tightened seed idempotency (non-unique inserts now guarded by `WHERE NOT EXISTS`).

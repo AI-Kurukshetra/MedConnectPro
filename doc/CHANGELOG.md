@@ -44,3 +44,5 @@
 - test(unit): Added unit tests for appointment validation logic, SMS webhook signature verification, and appointment availability route auth/validation handling.
 - test(e2e): Added Playwright core-journey spec scaffold at `tests/e2e/core-journey.spec.js`.
 - test(schema): Added Zod reminder validation schemas and corresponding unit tests.
+- docs(schema): Added manual QA seed SQL block to `doc/SCHEMA.md` with idempotent demo data inserts and verification queries.
+- fix(schema): Corrected seed SQL variable/column name collisions, restored canonical column names, and made non-unique seed inserts idempotent with `WHERE NOT EXISTS`.

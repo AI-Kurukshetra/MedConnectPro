@@ -8,6 +8,7 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [x] `2026-03-14 11:40` Scaffold initial Next.js App Router architecture with Tailwind + Supabase client setup and core directories
 - [x] `2026-03-14 12:15` Stabilize baseline quality gates: fix strict TypeScript errors and add non-interactive ESLint config
 - [x] `2026-03-14 12:21` Fix review findings: make `pnpm typecheck` deterministic and run Supabase session middleware on all app routes
+- [x] `2026-03-14 14:20` Add manual QA seed SQL block in `doc/SCHEMA.md` for dashboard/API end-to-end testing
 
 ## MVP Delivery Plan (Must-Have)
 - [x] `2026-03-14 12:32` Finalize Supabase MVP schema + RLS SQL in `doc/SCHEMA.md` for dashboard execution

@@ -557,3 +557,351 @@ for insert with check (auth.role() = 'service_role');
 4. `notification_deliveries` unifies outbound status tracking across reminders and messaging pipelines.
 5. Use service-role server-side only for privileged inserts into `audit_logs` and `ehr_sync_events`.
 6. Execute this block once in Supabase Dashboard SQL editor before implementing message/appointment/reminder route handlers.
+
+## Seed SQL (Manual QA Data)
+Run this block in Supabase SQL Editor after the schema block above. It is idempotent and designed for dashboard/manual testing.
+
+Before running:
+1. Create two auth users in Supabase Auth UI:
+   - `provider@example.com`
+   - `patient@example.com`
+2. If you use different emails, update `provider_email` and `patient_email` in the block.
+
+```sql
+DO $$
+DECLARE
+  provider_email text := 'provider@example.com';
+  patient_email  text := 'patient@example.com';
+
+  v_provider_user_id uuid;
+  v_patient_user_id  uuid;
+  org_id             uuid;
+  v_patient_row_id   uuid;
+  v_thread_id        uuid;
+  v_message_out_id   uuid;
+  v_appt_upcoming_1  uuid;
+  v_appt_upcoming_2  uuid;
+  v_appt_past_1      uuid;
+  v_conn_id          uuid;
+  v_appt1_start      timestamptz := date_trunc('day', now()) + interval '1 day 10 hours';
+  v_appt1_end        timestamptz := date_trunc('day', now()) + interval '1 day 10 hours 30 minutes';
+  v_appt2_start      timestamptz := date_trunc('day', now()) + interval '2 day 14 hours';
+  v_appt2_end        timestamptz := date_trunc('day', now()) + interval '2 day 14 hours 30 minutes';
+  v_appt3_start      timestamptz := date_trunc('day', now()) - interval '3 day 9 hours';
+  v_appt3_end        timestamptz := date_trunc('day', now()) - interval '3 day 8 hours 30 minutes';
+BEGIN
+  SELECT id INTO v_provider_user_id FROM auth.users WHERE email = provider_email LIMIT 1;
+  SELECT id INTO v_patient_user_id  FROM auth.users WHERE email = patient_email  LIMIT 1;
+
+  IF v_provider_user_id IS NULL THEN
+    RAISE EXCEPTION 'Provider auth user not found for email %', provider_email;
+  END IF;
+  IF v_patient_user_id IS NULL THEN
+    RAISE EXCEPTION 'Patient auth user not found for email %', patient_email;
+  END IF;
+
+  INSERT INTO public.organizations (name, timezone)
+  SELECT 'MedConnect Demo Clinic', 'UTC'
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.organizations o
+    WHERE o.name = 'MedConnect Demo Clinic'
+  );
+
+  SELECT id INTO org_id
+  FROM public.organizations
+  WHERE name = 'MedConnect Demo Clinic'
+  ORDER BY created_at ASC
+  LIMIT 1;
+
+  INSERT INTO public.profiles (id, full_name, role, phone)
+  VALUES
+    (v_provider_user_id, 'Dr. Demo Provider', 'provider', '+15550000001'),
+    (v_patient_user_id,  'Pat Demo Patient',  'patient',  '+15550000002')
+  ON CONFLICT (id) DO UPDATE
+    SET full_name = EXCLUDED.full_name,
+        role = EXCLUDED.role,
+        phone = EXCLUDED.phone;
+
+  INSERT INTO public.org_members (organization_id, user_id, member_role)
+  VALUES
+    (org_id, v_provider_user_id, 'provider'),
+    (org_id, v_patient_user_id,  'patient')
+  ON CONFLICT (organization_id, user_id) DO UPDATE
+    SET member_role = EXCLUDED.member_role;
+
+  INSERT INTO public.patients (
+    organization_id,
+    profile_id,
+    mrn,
+    full_name,
+    date_of_birth,
+    phone,
+    email,
+    preferred_timezone
+  )
+  VALUES (
+    org_id,
+    v_patient_user_id,
+    'MRN-DEMO-001',
+    'Pat Demo Patient',
+    DATE '1990-01-15',
+    '+15550000002',
+    patient_email,
+    'UTC'
+  )
+  ON CONFLICT (organization_id, mrn) DO UPDATE
+    SET profile_id = EXCLUDED.profile_id,
+        full_name = EXCLUDED.full_name,
+        phone = EXCLUDED.phone,
+        email = EXCLUDED.email,
+        preferred_timezone = EXCLUDED.preferred_timezone;
+
+  SELECT id INTO v_patient_row_id
+  FROM public.patients
+  WHERE organization_id = org_id AND mrn = 'MRN-DEMO-001'
+  LIMIT 1;
+
+  INSERT INTO public.patient_provider_links (organization_id, patient_id, provider_user_id)
+  VALUES (org_id, v_patient_row_id, v_provider_user_id)
+  ON CONFLICT (patient_id, provider_user_id) DO NOTHING;
+
+  INSERT INTO public.patient_notification_preferences (
+    organization_id, patient_id, allow_sms, allow_email, allow_voice, allow_push, quiet_hours_start, quiet_hours_end
+  )
+  VALUES (
+    org_id, v_patient_row_id, true, true, false, false, '22:00:00', '06:00:00'
+  )
+  ON CONFLICT (patient_id) DO UPDATE
+    SET allow_sms = EXCLUDED.allow_sms,
+        allow_email = EXCLUDED.allow_email,
+        allow_voice = EXCLUDED.allow_voice,
+        allow_push = EXCLUDED.allow_push,
+        quiet_hours_start = EXCLUDED.quiet_hours_start,
+        quiet_hours_end = EXCLUDED.quiet_hours_end;
+
+  INSERT INTO public.reminder_rules (organization_id, channel, minutes_before, is_enabled)
+  VALUES
+    (org_id, 'in_app', 1440, true),
+    (org_id, 'sms',     120, true),
+    (org_id, 'email',    30, true)
+  ON CONFLICT (organization_id, channel, minutes_before) DO UPDATE
+    SET is_enabled = EXCLUDED.is_enabled;
+
+  SELECT id INTO v_thread_id
+  FROM public.message_threads
+  WHERE organization_id = org_id
+    AND patient_id = v_patient_row_id
+    AND subject = 'Initial consultation follow-up'
+  ORDER BY created_at ASC
+  LIMIT 1;
+
+  IF v_thread_id IS NULL THEN
+    INSERT INTO public.message_threads (organization_id, patient_id, subject, created_by)
+    VALUES (org_id, v_patient_row_id, 'Initial consultation follow-up', v_provider_user_id)
+    RETURNING id INTO v_thread_id;
+  END IF;
+
+  INSERT INTO public.messages (thread_id, sender_user_id, channel, direction, body_ciphertext, body_preview, metadata)
+  SELECT v_thread_id, v_provider_user_id, 'in_app', 'outbound', 'cipher:demo-provider-1', 'Welcome to MedConnect Pro. How are you feeling today?', '{}'::jsonb
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.messages m
+    WHERE m.thread_id = v_thread_id
+      AND m.sender_user_id = v_provider_user_id
+      AND m.body_ciphertext = 'cipher:demo-provider-1'
+  );
+
+  INSERT INTO public.messages (thread_id, sender_user_id, channel, direction, body_ciphertext, body_preview, metadata)
+  SELECT v_thread_id, v_patient_user_id, 'in_app', 'inbound', 'cipher:demo-patient-1', 'I am feeling better, thank you.', '{}'::jsonb
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.messages m
+    WHERE m.thread_id = v_thread_id
+      AND m.sender_user_id = v_patient_user_id
+      AND m.body_ciphertext = 'cipher:demo-patient-1'
+  );
+
+  INSERT INTO public.appointments (organization_id, patient_id, provider_user_id, starts_at, ends_at, status, notes, created_by)
+  SELECT org_id, v_patient_row_id, v_provider_user_id, v_appt1_start, v_appt1_end, 'scheduled', 'Follow-up visit', v_provider_user_id
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.appointments a
+    WHERE a.organization_id = org_id
+      AND a.patient_id = v_patient_row_id
+      AND a.provider_user_id = v_provider_user_id
+      AND a.starts_at = v_appt1_start
+      AND a.ends_at = v_appt1_end
+  );
+
+  INSERT INTO public.appointments (organization_id, patient_id, provider_user_id, starts_at, ends_at, status, notes, created_by)
+  SELECT org_id, v_patient_row_id, v_provider_user_id, v_appt2_start, v_appt2_end, 'confirmed', 'Lab review', v_provider_user_id
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.appointments a
+    WHERE a.organization_id = org_id
+      AND a.patient_id = v_patient_row_id
+      AND a.provider_user_id = v_provider_user_id
+      AND a.starts_at = v_appt2_start
+      AND a.ends_at = v_appt2_end
+  );
+
+  INSERT INTO public.appointments (organization_id, patient_id, provider_user_id, starts_at, ends_at, status, notes, created_by)
+  SELECT org_id, v_patient_row_id, v_provider_user_id, v_appt3_start, v_appt3_end, 'completed', 'Initial checkup', v_provider_user_id
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.appointments a
+    WHERE a.organization_id = org_id
+      AND a.patient_id = v_patient_row_id
+      AND a.provider_user_id = v_provider_user_id
+      AND a.starts_at = v_appt3_start
+      AND a.ends_at = v_appt3_end
+  );
+
+  SELECT id INTO v_appt_upcoming_1
+  FROM public.appointments
+  WHERE organization_id = org_id
+    AND patient_id = v_patient_row_id
+    AND provider_user_id = v_provider_user_id
+    AND starts_at = v_appt1_start
+  LIMIT 1;
+
+  SELECT id INTO v_appt_upcoming_2
+  FROM public.appointments
+  WHERE organization_id = org_id
+    AND patient_id = v_patient_row_id
+    AND provider_user_id = v_provider_user_id
+    AND starts_at = v_appt2_start
+  LIMIT 1;
+
+  SELECT id INTO v_appt_past_1
+  FROM public.appointments
+  WHERE organization_id = org_id
+    AND patient_id = v_patient_row_id
+    AND provider_user_id = v_provider_user_id
+    AND starts_at = v_appt3_start
+  LIMIT 1;
+
+  IF v_appt_upcoming_1 IS NOT NULL THEN
+    INSERT INTO public.appointment_reminders (appointment_id, channel, scheduled_for, status)
+    VALUES
+      (v_appt_upcoming_1, 'in_app', (SELECT starts_at - interval '24 hours' FROM public.appointments WHERE id = v_appt_upcoming_1), 'pending'),
+      (v_appt_upcoming_1, 'sms',    (SELECT starts_at - interval '2 hours'  FROM public.appointments WHERE id = v_appt_upcoming_1), 'pending')
+    ON CONFLICT (appointment_id, channel, scheduled_for) DO NOTHING;
+  END IF;
+
+  IF v_appt_upcoming_2 IS NOT NULL THEN
+    INSERT INTO public.appointment_reminders (appointment_id, channel, scheduled_for, status)
+    VALUES
+      (v_appt_upcoming_2, 'email',  (SELECT starts_at - interval '30 minutes' FROM public.appointments WHERE id = v_appt_upcoming_2), 'pending')
+    ON CONFLICT (appointment_id, channel, scheduled_for) DO NOTHING;
+  END IF;
+
+  INSERT INTO public.notification_deliveries (
+    organization_id, patient_id, channel, destination, provider_name, provider_message_id, status, metadata
+  )
+  SELECT org_id, v_patient_row_id, 'in_app', null, 'medconnect_in_app', gen_random_uuid()::text, 'delivered',
+         '{"notificationType":"appointment_confirmation","seed":"manual_qa"}'::jsonb
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.notification_deliveries nd
+    WHERE nd.organization_id = org_id
+      AND nd.patient_id = v_patient_row_id
+      AND nd.channel = 'in_app'
+      AND nd.metadata->>'seed' = 'manual_qa'
+      AND nd.metadata->>'notificationType' = 'appointment_confirmation'
+  );
+
+  INSERT INTO public.notification_deliveries (
+    organization_id, patient_id, channel, destination, provider_name, provider_message_id, status, metadata
+  )
+  SELECT org_id, v_patient_row_id, 'sms', '+15550000002', 'mock_sms_provider', gen_random_uuid()::text, 'pending',
+         '{"notificationType":"appointment_reminder","seed":"manual_qa"}'::jsonb
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.notification_deliveries nd
+    WHERE nd.organization_id = org_id
+      AND nd.patient_id = v_patient_row_id
+      AND nd.channel = 'sms'
+      AND nd.metadata->>'seed' = 'manual_qa'
+      AND nd.metadata->>'notificationType' = 'appointment_reminder'
+  );
+
+  INSERT INTO public.notification_deliveries (
+    organization_id, patient_id, channel, destination, provider_name, provider_message_id, status, metadata
+  )
+  SELECT org_id, v_patient_row_id, 'email', patient_email, 'mock_email_provider', gen_random_uuid()::text, 'pending',
+         '{"notificationType":"appointment_reminder","seed":"manual_qa"}'::jsonb
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.notification_deliveries nd
+    WHERE nd.organization_id = org_id
+      AND nd.patient_id = v_patient_row_id
+      AND nd.channel = 'email'
+      AND nd.metadata->>'seed' = 'manual_qa'
+      AND nd.metadata->>'notificationType' = 'appointment_reminder'
+  );
+
+  INSERT INTO public.ehr_connections (organization_id, provider_name, external_tenant_id, status)
+  VALUES (org_id, 'demo_ehr', 'tenant-demo-001', 'active')
+  ON CONFLICT (organization_id) DO UPDATE
+    SET provider_name = EXCLUDED.provider_name,
+        external_tenant_id = EXCLUDED.external_tenant_id,
+        status = EXCLUDED.status;
+
+  SELECT id INTO v_conn_id
+  FROM public.ehr_connections
+  WHERE organization_id = org_id
+  LIMIT 1;
+
+  SELECT id INTO v_message_out_id
+  FROM public.messages
+  WHERE thread_id = v_thread_id
+    AND sender_user_id = v_provider_user_id
+    AND body_ciphertext = 'cipher:demo-provider-1'
+  LIMIT 1;
+
+  IF v_appt_upcoming_1 IS NOT NULL THEN
+    INSERT INTO public.ehr_sync_events (
+      connection_id, organization_id, entity_type, entity_id, direction, status, payload
+    )
+    SELECT v_conn_id, org_id, 'appointment', v_appt_upcoming_1, 'outbound', 'pending',
+           jsonb_build_object('resourceType', 'Appointment', 'appointmentId', v_appt_upcoming_1, 'seed', 'manual_qa')
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM public.ehr_sync_events ese
+      WHERE ese.connection_id = v_conn_id
+        AND ese.entity_type = 'appointment'
+        AND ese.entity_id = v_appt_upcoming_1
+        AND ese.direction = 'outbound'
+        AND ese.status = 'pending'
+    );
+  END IF;
+
+  IF v_message_out_id IS NOT NULL THEN
+    INSERT INTO public.ehr_sync_events (
+      connection_id, organization_id, entity_type, entity_id, direction, status, payload
+    )
+    SELECT v_conn_id, org_id, 'message', v_message_out_id, 'outbound', 'pending',
+           jsonb_build_object('resourceType', 'Communication', 'messageId', v_message_out_id, 'seed', 'manual_qa')
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM public.ehr_sync_events ese
+      WHERE ese.connection_id = v_conn_id
+        AND ese.entity_type = 'message'
+        AND ese.entity_id = v_message_out_id
+        AND ese.direction = 'outbound'
+        AND ese.status = 'pending'
+    );
+  END IF;
+END $$;
+```
+
+### Quick Verification Queries
+```sql
+select name, timezone from public.organizations where name = 'MedConnect Demo Clinic';
+select full_name, role from public.profiles where full_name in ('Dr. Demo Provider', 'Pat Demo Patient');
+select status, starts_at, ends_at from public.appointments order by starts_at desc limit 10;
+select channel, status, requested_at from public.notification_deliveries order by requested_at desc limit 10;
+select entity_type, status, created_at from public.ehr_sync_events order by created_at desc limit 10;
+```
