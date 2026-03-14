@@ -20,6 +20,11 @@ type ThreadRow = {
   updated_at: string;
 };
 
+const statusStyles: Record<string, string> = {
+  scheduled: "bg-cyan-400/10 text-cyan-200 border-cyan-300/35",
+  confirmed: "bg-emerald-400/10 text-emerald-200 border-emerald-300/35"
+};
+
 function formatDateTime(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -69,39 +74,71 @@ export default async function PatientPortalPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="space-y-1">
-        <h2 className="text-xl font-semibold">Patient Portal</h2>
-        <p className="text-sm text-slate-600">View upcoming visits and your recent message threads.</p>
+      <header className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Patient View</p>
+        <h2 className="text-2xl font-semibold text-white">Patient Portal</h2>
+        <p className="text-sm text-slate-300">View upcoming visits and your recent message threads.</p>
       </header>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Upcoming</p>
+          <p className="mt-2 text-2xl font-semibold text-cyan-200">{appointments.length}</p>
+          <p className="text-xs text-slate-400">Appointments</p>
+        </article>
+        <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Threads</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-200">{threads.length}</p>
+          <p className="text-xs text-slate-400">Recent conversations</p>
+        </article>
+        <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Timezone</p>
+          <p className="mt-2 text-2xl font-semibold text-amber-200">UTC</p>
+          <p className="text-xs text-slate-400">Demo profile setting</p>
+        </article>
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-xl border p-4">
-          <h3 className="text-base font-semibold">Upcoming Appointments</h3>
-          <ul className="mt-3 space-y-2">
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
+          <h3 className="text-base font-semibold text-white">Upcoming Appointments</h3>
+          <ul className="mt-3 space-y-2.5">
             {appointments.length === 0 ? (
-              <li className="rounded-md bg-slate-50 p-3 text-sm text-slate-600">No upcoming appointments found.</li>
+              <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-400">
+                No upcoming appointments found.
+              </li>
             ) : (
               appointments.map((appointment) => (
-                <li className="rounded-md border p-3" key={appointment.id}>
-                  <p className="text-sm font-medium">
+                <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3.5" key={appointment.id}>
+                  <p className="text-sm font-medium text-slate-100">
                     {formatDateTime(appointment.starts_at)} - {formatDateTime(appointment.ends_at)}
                   </p>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">{appointment.status}</p>
-                  {appointment.notes ? <p className="mt-1 text-sm text-slate-600">{appointment.notes}</p> : null}
+                  <p className="mt-2">
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ${
+                        statusStyles[appointment.status] ?? "bg-slate-800 text-slate-200 border-slate-700"
+                      }`}
+                    >
+                      {appointment.status}
+                    </span>
+                  </p>
+                  {appointment.notes ? <p className="mt-2 text-sm text-slate-300">{appointment.notes}</p> : null}
                 </li>
               ))
             )}
           </ul>
         </section>
-        <section className="rounded-xl border p-4">
-          <h3 className="text-base font-semibold">Messages</h3>
-          <ul className="mt-3 space-y-2">
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
+          <h3 className="text-base font-semibold text-white">Messages</h3>
+          <ul className="mt-3 space-y-2.5">
             {threads.length === 0 ? (
-              <li className="rounded-md bg-slate-50 p-3 text-sm text-slate-600">No message threads yet.</li>
+              <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-400">
+                No message threads yet.
+              </li>
             ) : (
               threads.map((thread) => (
-                <li className="rounded-md border p-3" key={thread.id}>
-                  <p className="text-sm font-medium">{thread.subject ?? "Patient conversation"}</p>
-                  <p className="text-xs text-slate-500">Last updated {formatDateTime(thread.updated_at)}</p>
+                <li className="rounded-lg border border-slate-800 bg-slate-950/70 p-3.5" key={thread.id}>
+                  <p className="text-sm font-medium text-slate-100">{thread.subject ?? "Patient conversation"}</p>
+                  <p className="text-xs text-slate-400">Last updated {formatDateTime(thread.updated_at)}</p>
                 </li>
               ))
             )}
