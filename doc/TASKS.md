@@ -17,6 +17,8 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [x] `2026-03-14 12:39` Apply SQL manually in Supabase Dashboard (human step)
 - [x] `2026-03-14 12:23` Implement Supabase Auth + protected dashboard layout gate in Next.js App Router
 - [x] `2026-03-14 17:35` Enforce role-based dashboard access: patient users restricted from provider dashboard and role-specific entry cards
+- [x] `2026-03-14 18:05` Stabilize dashboard data loading by reusing per-request Supabase client for auth+queries and add patient/provider diagnostics/scoped queries
+- [x] `2026-03-14 18:08` Harden auth timeout handling in login/server guards to reduce false `auth_unavailable` under Supabase latency
 - [x] `2026-03-14 12:42` Implement messaging endpoints via Next.js Route Handlers (`app/api/messages/*`)
 - [x] `2026-03-14 12:45` Implement secure inbound SMS webhook + outbound SMS send flow for true two-way patient/provider messaging
 - [x] `2026-03-14 12:49` Implement appointment endpoints via Next.js Route Handlers (`app/api/appointments/*`)

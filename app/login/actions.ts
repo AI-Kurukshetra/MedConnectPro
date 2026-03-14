@@ -3,8 +3,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-const AUTH_TIMEOUT_MS = 7000;
-const AUTH_RETRY_DELAY_MS = 400;
+const AUTH_TIMEOUT_MS = 15000;
+const AUTH_RETRY_DELAY_MS = 600;
+const AUTH_MAX_ATTEMPTS = 3;
 
 function getSafeNextPath(rawNext: FormDataEntryValue | null): string {
   if (typeof rawNext !== "string") {
@@ -52,7 +53,7 @@ export async function signInWithPasswordAction(formData: FormData) {
   const supabase = await createClient();
   let authResult: Awaited<ReturnType<typeof supabase.auth.signInWithPassword>> | null = null;
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < AUTH_MAX_ATTEMPTS; attempt += 1) {
     try {
       authResult = await withTimeout(
         supabase.auth.signInWithPassword({
@@ -62,11 +63,18 @@ export async function signInWithPasswordAction(formData: FormData) {
         AUTH_TIMEOUT_MS
       );
       break;
-    } catch {
-      if (attempt === 1) {
-        redirect(`/login?error=auth_unavailable&next=${encodeURIComponent(nextPath)}`);
+    } catch (error) {
+      const maybeSession = await supabase.auth.getSession();
+      if (maybeSession.data.session) {
+        redirect(nextPath);
       }
-      await delay(AUTH_RETRY_DELAY_MS);
+
+      if (attempt === AUTH_MAX_ATTEMPTS - 1) {
+        const errorCode =
+          error instanceof Error && error.message === "auth_timeout" ? "auth_unavailable" : "invalid_credentials";
+        redirect(`/login?error=${errorCode}&next=${encodeURIComponent(nextPath)}`);
+      }
+      await delay(AUTH_RETRY_DELAY_MS * (attempt + 1));
     }
   }
 

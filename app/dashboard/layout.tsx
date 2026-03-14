@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
 import { AppShell } from "@/components/app-shell";
+import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { signOutAction } from "@/app/dashboard/actions";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const user = await requireUser();
+  const supabase = await createClient();
+  const user = await requireUser(supabase);
 
   return (
     <AppShell

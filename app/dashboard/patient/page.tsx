@@ -40,12 +40,36 @@ function formatDateTime(value: string): string {
 }
 
 export default async function PatientPortalPage() {
-  const { user } = await requirePatientUser();
   const supabase = await createClient();
+  const { user } = await requirePatientUser(supabase);
 
-  const { data: patient } = await supabase.from("patients").select("id").eq("profile_id", user.id).maybeSingle();
+  let pageError: string | null = null;
 
-  const patientId = patient?.id;
+  const { data: patientByProfile, error: patientByProfileError } = await supabase
+    .from("patients")
+    .select("id")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+
+  if (patientByProfileError) {
+    pageError = `Patient profile lookup failed: ${patientByProfileError.message}`;
+  }
+
+  let patientId = patientByProfile?.id ?? null;
+
+  if (!patientId && user.email) {
+    const { data: patientByEmail, error: patientByEmailError } = await supabase
+      .from("patients")
+      .select("id")
+      .eq("email", user.email)
+      .maybeSingle();
+
+    if (patientByEmailError) {
+      pageError = pageError ?? `Patient email fallback lookup failed: ${patientByEmailError.message}`;
+    } else {
+      patientId = patientByEmail?.id ?? null;
+    }
+  }
 
   let appointments: AppointmentRow[] = [];
   let threads: ThreadRow[] = [];
@@ -68,8 +92,18 @@ export default async function PatientPortalPage() {
         .limit(6)
     ]);
 
+    if (appointmentsResult.error) {
+      pageError = pageError ?? `Appointments query failed: ${appointmentsResult.error.message}`;
+    }
+
+    if (threadsResult.error) {
+      pageError = pageError ?? `Threads query failed: ${threadsResult.error.message}`;
+    }
+
     appointments = (appointmentsResult.data ?? []) as AppointmentRow[];
     threads = (threadsResult.data ?? []) as ThreadRow[];
+  } else if (!pageError) {
+    pageError = "No patient record is linked to your account yet.";
   }
 
   return (
@@ -79,6 +113,10 @@ export default async function PatientPortalPage() {
         <h2 className="text-2xl font-semibold text-white">Patient Portal</h2>
         <p className="text-sm text-slate-300">View upcoming visits and your recent message threads.</p>
       </header>
+
+      {pageError ? (
+        <div className="rounded-xl border border-amber-300/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">{pageError}</div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <article className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">

@@ -115,3 +115,7 @@
 ## 2026-03-14 - Dashboard Routes Enforce User Role
 - Decision: Gate dashboard routes by `profiles.role` in server components: `patient` users can access only `/dashboard/patient`, while `provider|staff|admin` users can access only `/dashboard/provider`; root `/dashboard` renders a single role-appropriate entry card.
 - Rationale: Aligns runtime behavior with PRD role-based access requirements and prevents cross-workflow navigation for unauthorized roles.
+
+## 2026-03-14 - Reuse Supabase Client Within Each Dashboard Request
+- Decision: Pass a single `createClient()` instance through auth/role guards and page data queries instead of creating separate server clients in the same request.
+- Rationale: Prevents auth-context drift between sequential server-client instances and improves consistency of RLS-backed dashboard reads.

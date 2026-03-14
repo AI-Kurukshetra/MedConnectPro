@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 import { requireCurrentUserRole } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
@@ -7,7 +8,8 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
-  const { role } = await requireCurrentUserRole();
+  const supabase = await createClient();
+  const { role } = await requireCurrentUserRole(supabase);
   const isPatient = role === "patient";
 
   return (

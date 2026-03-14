@@ -54,3 +54,7 @@
 - fix(config): Upgraded `next` and `eslint-config-next` from `15.3.1` to `16.1.6` to remediate Vercel-reported vulnerable Next.js version (`CVE-2025-66478`).
 - chore(config): Switched lint script from `next lint` to `eslint .` and added flat config (`eslint.config.mjs`) for ESLint 9 + Next 16 compatibility.
 - fix(auth): Added role guard helpers in `lib/auth/session.ts` and enforced role-based dashboard access on `app/dashboard`, `app/dashboard/patient`, and `app/dashboard/provider` so patient users cannot access provider workflow routes.
+- fix(auth): Updated session helpers to accept/reuse an existing Supabase server client so auth checks and downstream dashboard queries share one per-request auth context.
+- fix(ui): Added patient dashboard diagnostics for profile/data query failures and a clear "no linked patient record" message instead of silent empty-state fallthrough.
+- perf(ui): Scoped provider dashboard thread/delivery queries to the current organization to avoid broad RLS scans and improve provider page responsiveness.
+- fix(auth): Increased login and server-session timeouts/retries and added session-fallback checks after timeout exceptions to avoid false `auth_unavailable` redirects during transient Supabase latency.

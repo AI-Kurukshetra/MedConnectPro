@@ -49,10 +49,17 @@ function formatDateTime(value: string): string {
 }
 
 export default async function ProviderDashboardPage() {
-  const { user } = await requireProviderUser();
   const supabase = await createClient();
+  const { user } = await requireProviderUser(supabase);
 
   const nowIso = new Date().toISOString();
+  const { data: orgMembership } = await supabase
+    .from("org_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+  const organizationId = orgMembership?.organization_id;
 
   const [appointmentsResult, queueResult, reminderStatusResult] = await Promise.all([
     supabase
@@ -63,16 +70,22 @@ export default async function ProviderDashboardPage() {
       .gte("starts_at", nowIso)
       .order("starts_at", { ascending: true })
       .limit(8),
-    supabase
-      .from("message_threads")
-      .select("id, updated_at, subject")
-      .order("updated_at", { ascending: false })
-      .limit(8),
-    supabase
-      .from("notification_deliveries")
-      .select("id, channel, status, requested_at, destination")
-      .order("requested_at", { ascending: false })
-      .limit(10)
+    organizationId
+      ? supabase
+          .from("message_threads")
+          .select("id, updated_at, subject")
+          .eq("organization_id", organizationId)
+          .order("updated_at", { ascending: false })
+          .limit(8)
+      : supabase.from("message_threads").select("id, updated_at, subject").limit(0),
+    organizationId
+      ? supabase
+          .from("notification_deliveries")
+          .select("id, channel, status, requested_at, destination")
+          .eq("organization_id", organizationId)
+          .order("requested_at", { ascending: false })
+          .limit(10)
+      : supabase.from("notification_deliveries").select("id, channel, status, requested_at, destination").limit(0)
   ]);
 
   const appointments = (appointmentsResult.data ?? []) as AppointmentRow[];
