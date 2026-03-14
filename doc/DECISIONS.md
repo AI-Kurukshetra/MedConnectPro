@@ -43,3 +43,11 @@
 ## 2026-03-14 - Password Auth via Server Actions for MVP
 - Decision: Implement login/logout with Supabase password auth in Next.js Server Actions and keep route protection in both middleware and dashboard layout.
 - Rationale: Provides minimal secure MVP authentication flow with no extra API surface, while preserving destination-aware redirects for protected routes.
+
+## 2026-03-14 - Final Schema Uses Channel-Complete Notifications + Audit Baseline
+- Decision: Finalize schema with message/reminder/notification channel coverage (`sms`, `email`, `voice`, `push`), patient-level notification preferences, provider-slot conflict prevention, and service-role-only audit/EHR event writes.
+- Rationale: Aligns database model directly to MVP feature requirements and prevents late-stage rework in route handler implementation.
+
+## 2026-03-14 - Messaging API Surface Starts with Thread + Message Endpoints
+- Decision: Implement initial messaging API as `GET/POST /api/messages/threads` and `GET/POST /api/messages/threads/[threadId]/messages`, with auth and validation in route handlers and access enforcement via Supabase RLS.
+- Rationale: Delivers the minimal composable foundation for patient/provider chat flows while keeping webhook/SMS transport work isolated to the next task.
