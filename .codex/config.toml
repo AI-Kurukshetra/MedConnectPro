@@ -1,0 +1,6 @@
+[experimental]
+multi_agent = true
+
+[agents.frontend]
+description = "Handles all UI, component, and styling work. Next.js App Router, Tailwind, shadcn/ui."
+config_file = ".codex/agents/frontend.toml"
