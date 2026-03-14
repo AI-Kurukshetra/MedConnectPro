@@ -9,6 +9,8 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [x] `2026-03-14 12:15` Stabilize baseline quality gates: fix strict TypeScript errors and add non-interactive ESLint config
 - [x] `2026-03-14 12:21` Fix review findings: make `pnpm typecheck` deterministic and run Supabase session middleware on all app routes
 - [x] `2026-03-14 14:20` Add manual QA seed SQL block in `doc/SCHEMA.md` for dashboard/API end-to-end testing
+- [x] `2026-03-14 15:33` Add project-local frontend skill scaffolding (`.agents/skills/frontend-design`, `.codex/agents`) for repeatable UI workflows
+- [x] `2026-03-14 16:55` Upgrade Next.js and lint config to clear Vercel vulnerable Next.js alert (`CVE-2025-66478`)
 
 ## MVP Delivery Plan (Must-Have)
 - [x] `2026-03-14 12:32` Finalize Supabase MVP schema + RLS SQL in `doc/SCHEMA.md` for dashboard execution
@@ -32,6 +34,8 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [x] `2026-03-14 14:02` Add unit tests for Zod schemas and route handlers
 - [x] `2026-03-14 13:54` Add E2E test for core journey: login -> book -> reminder -> message reply
 - [x] `2026-03-14 13:54` Run checks (`pnpm lint`, `pnpm typecheck`, `pnpm build`) and full test suite once test scripts exist
+- [x] `2026-03-14 15:23` Stabilize auth flow under intermittent Supabase latency by removing login precheck loop and hardening server auth retries/timeouts
+- [x] `2026-03-14 15:33` Redesign landing page with clean responsive visual system, clear product messaging, and dashboard/login CTAs
 
 ## Stack Guardrails (Non-Negotiable)
 - [ ] No Express or standalone Node backend server introduced

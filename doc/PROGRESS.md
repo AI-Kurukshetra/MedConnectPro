@@ -26,3 +26,6 @@
 [2026-03-14 14:02] codex — Installed `zod`, added reminder-related Zod schemas and unit tests, re-ran full quality gates (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`) successfully, and cleared testing blocker state.
 [2026-03-14 14:20] codex — Added an idempotent manual QA seed SQL section to `doc/SCHEMA.md` covering provider/patient/org setup, demo appointments/messages/reminders/notifications, and EHR sync seed data with verification queries.
 [2026-03-14 14:22] codex — Fixed seed SQL PL/pgSQL ambiguity by switching demo variables to `v_*` names, restored table column names, and tightened seed idempotency (non-unique inserts now guarded by `WHERE NOT EXISTS`).
+[2026-03-14 15:23] codex — Stabilized login/session flow for Supabase latency: removed login-page auth precheck, made middleware session refresh non-blocking, and added retry+timeout handling in sign-in and server-side `requireUser`; lint/typecheck pass.
+[2026-03-14 15:33] codex — Added project-local frontend skill scaffolding (`.agents/skills/frontend-design`, `.codex/agents/frontend.toml`, `.codex/config.toml`) and redesigned `app/page.tsx` into a polished responsive landing page; lint/typecheck pass.
+[2026-03-14 16:55] codex — Upgraded `next`/`eslint-config-next` to `16.1.6`, migrated lint to flat ESLint config, and verified `pnpm lint`, `pnpm typecheck`, and `pnpm build` pass.

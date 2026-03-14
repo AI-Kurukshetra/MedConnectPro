@@ -99,3 +99,15 @@
 ## 2026-03-14 - Seed Data Lives in SCHEMA Doc for Dashboard Execution
 - Decision: Provide manual QA seed SQL directly in `doc/SCHEMA.md` (instead of CLI seed tooling) using auth-email lookups and idempotent inserts.
 - Rationale: Matches the hackathon constraint of dashboard-first Supabase operations and enables repeatable demo data setup without local infra tooling.
+
+## 2026-03-14 - Auth Guarding Moved Away From Middleware Redirect Decisions
+- Decision: Middleware now performs best-effort session refresh only; protected-route access decisions are enforced in server-rendered route guards (`requireUser`) with retry-aware timeouts.
+- Rationale: During Supabase latency spikes, middleware redirect checks caused false unauthenticated loops even after successful `/token`; centralizing auth gating in one server path reduces loop risk.
+
+## 2026-03-14 - Frontend Skill Standardized In-Repo
+- Decision: Add a repo-local `frontend-design` skill and frontend agent config so UI iteration workflows are explicit and reusable across sessions.
+- Rationale: Keeps landing page/dashboard visual work consistent and reduces coordination overhead when delegating UI-only tasks.
+
+## 2026-03-14 - Move to Next.js 16 Security Baseline
+- Decision: Upgrade framework tooling to `next@16.1.6` and `eslint-config-next@16.1.6`, and replace `next lint` with flat ESLint execution (`eslint .`) for compatibility.
+- Rationale: Clears Vercel vulnerability enforcement (`CVE-2025-66478`) while preserving quality gates (`lint`, `typecheck`, `build`) under the current toolchain.

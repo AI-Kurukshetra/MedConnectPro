@@ -46,3 +46,10 @@
 - test(schema): Added Zod reminder validation schemas and corresponding unit tests.
 - docs(schema): Added manual QA seed SQL block to `doc/SCHEMA.md` with idempotent demo data inserts and verification queries.
 - fix(schema): Corrected seed SQL variable/column name collisions, restored canonical column names, and made non-unique seed inserts idempotent with `WHERE NOT EXISTS`.
+- fix(auth): Removed login-page `getUser()` precheck to prevent extra auth round-trips during sign-in and reduce timeout-driven login loops.
+- fix(auth): Changed middleware session update to non-blocking `getSession()` refresh behavior (no protected-route redirect decisions inside middleware).
+- fix(auth): Hardened login and server route guards with retry + timeout handling and explicit `auth_unavailable` error path.
+- chore(agents): Added project-local multi-agent frontend setup via `.codex/config.toml`, `.codex/agents/frontend.toml`, and `.agents/skills/frontend-design/*`.
+- feat(ui): Replaced root landing screen with a clean, responsive hero layout featuring product positioning, CTA actions, and feature snapshot cards.
+- fix(config): Upgraded `next` and `eslint-config-next` from `15.3.1` to `16.1.6` to remediate Vercel-reported vulnerable Next.js version (`CVE-2025-66478`).
+- chore(config): Switched lint script from `next lint` to `eslint .` and added flat config (`eslint.config.mjs`) for ESLint 9 + Next 16 compatibility.
