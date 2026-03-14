@@ -24,3 +24,6 @@
 - fix(schema): Replaced unsupported `create policy if not exists` syntax with Postgres-compatible `drop policy if exists` + `create policy` statements for Supabase SQL Editor execution.
 - feat(api): Added messaging route handlers at `app/api/messages/threads` and `app/api/messages/threads/[threadId]/messages` for authenticated thread/message read-write operations.
 - fix(config): Added `tsconfig.typecheck.json` and updated `pnpm typecheck` script to avoid generated `.next/types` race conditions.
+- feat(api): Added secure inbound SMS webhook endpoint at `app/api/messages/inbound/sms` with HMAC signature + timestamp verification and admin-client persistence flow.
+- feat(api): Added outbound SMS send endpoint at `app/api/messages/send/sms` with provider dispatch, message persistence, and notification delivery tracking.
+- feat(config): Added server-side Supabase admin helper and SMS env typings (`SUPABASE_SERVICE_ROLE_KEY`, `SMS_WEBHOOK_SECRET`, provider config vars).

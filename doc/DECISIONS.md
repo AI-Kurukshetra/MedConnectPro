@@ -51,3 +51,7 @@
 ## 2026-03-14 - Messaging API Surface Starts with Thread + Message Endpoints
 - Decision: Implement initial messaging API as `GET/POST /api/messages/threads` and `GET/POST /api/messages/threads/[threadId]/messages`, with auth and validation in route handlers and access enforcement via Supabase RLS.
 - Rationale: Delivers the minimal composable foundation for patient/provider chat flows while keeping webhook/SMS transport work isolated to the next task.
+
+## 2026-03-14 - SMS Webhook Security Uses Signed Raw Payload + Timestamp Window
+- Decision: Require `x-medconnect-signature` (HMAC-SHA256 hex over `<timestamp>.<raw_body>`) and `x-medconnect-timestamp` on inbound SMS webhook requests, validated server-side before any DB write.
+- Rationale: Prevents spoofed/replayed inbound SMS payloads while keeping provider integration transport-agnostic for MVP.

@@ -14,7 +14,7 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [x] `2026-03-14 12:39` Apply SQL manually in Supabase Dashboard (human step)
 - [x] `2026-03-14 12:23` Implement Supabase Auth + protected dashboard layout gate in Next.js App Router
 - [x] `2026-03-14 12:42` Implement messaging endpoints via Next.js Route Handlers (`app/api/messages/*`)
-- [ ] Implement secure inbound SMS webhook + outbound SMS send flow for true two-way patient/provider messaging
+- [x] `2026-03-14 12:45` Implement secure inbound SMS webhook + outbound SMS send flow for true two-way patient/provider messaging
 - [ ] Implement appointment endpoints via Next.js Route Handlers (`app/api/appointments/*`)
 - [ ] Implement real-time appointment availability slot calculation + booking conflict prevention in Supabase
 - [ ] Implement automated appointment confirmation notifications on successful booking
