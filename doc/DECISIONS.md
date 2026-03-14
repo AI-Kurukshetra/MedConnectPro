@@ -27,3 +27,19 @@
 ## 2026-03-14 - Start with Architecture-Only Scaffold
 - Decision: Generate only foundational project structure, configuration, and Supabase client/auth plumbing; defer all business features.
 - Rationale: Preserves momentum and de-risks setup while keeping MVP feature implementation in explicit backlog tasks.
+
+## 2026-03-14 - Baseline Quality Gates Must Be Non-Interactive and Strict-Clean
+- Decision: Add committed ESLint config and resolve strict TypeScript errors before feature implementation continues.
+- Rationale: Prevents CI/dev pipeline stalls and ensures every subsequent feature task starts from a buildable baseline.
+
+## 2026-03-14 - Align MVP Backlog to PRD Scope
+- Decision: Treat mass communication as deferred (non-MVP) and update TASKS accordingly.
+- Rationale: Removes planning ambiguity and keeps execution aligned to the current PRD scope for hackathon delivery.
+
+## 2026-03-14 - Deterministic Typecheck + Global Session Refresh
+- Decision: Run `tsc` in non-incremental mode for `pnpm typecheck`, and apply middleware to all non-static routes for Supabase `updateSession()`.
+- Rationale: Eliminates cache-related false negatives in type checks and aligns auth/session behavior with project standards that require request-wide session refresh.
+
+## 2026-03-14 - Password Auth via Server Actions for MVP
+- Decision: Implement login/logout with Supabase password auth in Next.js Server Actions and keep route protection in both middleware and dashboard layout.
+- Rationale: Provides minimal secure MVP authentication flow with no extra API surface, while preserving destination-aware redirects for protected routes.

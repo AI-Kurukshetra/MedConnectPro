@@ -11,3 +11,12 @@
 
 - docs(tasks): Expanded MVP checklist to fully cover all 9 must-have features from required feature source of truth.
 - feat(config): Scaffolded project baseline with Next.js App Router, TypeScript strict config, TailwindCSS, Supabase SSR/browser clients, middleware auth gate, and starter app/pages.
+- fix(auth): Added explicit cookie typing for Supabase SSR helpers to satisfy strict TypeScript in middleware and server client.
+- chore(config): Added `.eslintrc.json` so `pnpm lint` runs non-interactively.
+- docs(tasks): Reconciled backlog scope/check entries with PRD; moved mass communication to deferred and added explicit Vitest setup task.
+- fix(config): Made `pnpm typecheck` deterministic by disabling TypeScript incremental cache usage in the typecheck script.
+- fix(auth): Updated root middleware matcher to run Supabase `updateSession()` on all non-static routes instead of only `/dashboard`.
+- chore(config): Ignored `*.tsbuildinfo` artifacts to keep working tree clean after TypeScript runs.
+- feat(auth): Added server actions for password sign-in and sign-out with safe `next` redirect handling.
+- feat(ui): Replaced login placeholder with functional auth form and error states; added dashboard sign-out control in app shell header.
+- fix(auth): Preserved intended destination for protected route redirects by attaching `next` query param when redirecting to `/login`.

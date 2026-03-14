@@ -6,11 +6,13 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [x] `2026-03-14 10:59` Initialize `/doc` system from AGENTS + BLUEPRINT with MVP-only scope
 - [x] `2026-03-14 11:02` Refactor docs to enforce required stack only (Next.js + Supabase + Vercel + TypeScript + TailwindCSS)
 - [x] `2026-03-14 11:40` Scaffold initial Next.js App Router architecture with Tailwind + Supabase client setup and core directories
+- [x] `2026-03-14 12:15` Stabilize baseline quality gates: fix strict TypeScript errors and add non-interactive ESLint config
+- [x] `2026-03-14 12:21` Fix review findings: make `pnpm typecheck` deterministic and run Supabase session middleware on all app routes
 
 ## MVP Delivery Plan (Must-Have)
 - [ ] Finalize Supabase MVP schema + RLS SQL in `doc/SCHEMA.md` for dashboard execution
 - [ ] Apply SQL manually in Supabase Dashboard (human step)
-- [ ] Implement Supabase Auth + protected dashboard layout gate in Next.js App Router
+- [x] `2026-03-14 12:23` Implement Supabase Auth + protected dashboard layout gate in Next.js App Router
 - [ ] Implement messaging endpoints via Next.js Route Handlers (`app/api/messages/*`)
 - [ ] Implement secure inbound SMS webhook + outbound SMS send flow for true two-way patient/provider messaging
 - [ ] Implement appointment endpoints via Next.js Route Handlers (`app/api/appointments/*`)
@@ -22,13 +24,13 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [ ] Implement responsive patient portal access patterns for mobile and desktop
 - [ ] Implement provider dashboard pages (queue + schedule + reminder status)
 - [ ] Implement HIPAA communication safeguards: RLS hardening, encrypted message storage fields, and audit logging tasks in schema/API
-- [ ] Implement mass communication tools (patient cohort selection + broadcast send route handlers + dashboard UI)
 - [ ] Implement one EHR integration adapter endpoint (`app/api/integrations/ehr/*`)
 - [ ] Implement minimal EHR data sync mapping for appointments and patient communication events
 - [ ] Implement multi-channel notification pipeline route handlers (`app/api/notifications/*`) for SMS, email, voice, and push
+- [ ] Set up Vitest test runner and add `pnpm test` script
 - [ ] Add unit tests for Zod schemas and route handlers
 - [ ] Add E2E test for core journey: login -> book -> reminder -> message reply
-- [ ] Run checks (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`)
+- [ ] Run checks (`pnpm lint`, `pnpm typecheck`, `pnpm build`) and full test suite once test scripts exist
 
 ## Stack Guardrails (Non-Negotiable)
 - [ ] No Express or standalone Node backend server introduced
@@ -40,3 +42,4 @@ Status key: `[ ]` todo, `[x]` done, `[~]` in-progress, `[!]` blocked
 - [ ] Predictive no-show scoring
 - [ ] Telehealth module
 - [ ] Payments and billing reminders
+- [ ] Mass communication campaigns (cohort targeting + broadcast)

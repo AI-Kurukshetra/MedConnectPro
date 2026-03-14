@@ -10,6 +10,8 @@ export async function updateSession(request: NextRequest) {
       headers: request.headers
     }
   });
+  type CookieOptions = Parameters<typeof response.cookies.set>[2];
+  type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -23,7 +25,7 @@ export async function updateSession(request: NextRequest) {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: CookieToSet[]) {
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
       }
     }
@@ -37,6 +39,8 @@ export async function updateSession(request: NextRequest) {
 
   if (isProtectedPath && !user) {
     const loginUrl = new URL("/login", request.url);
+    const requestedPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+    loginUrl.searchParams.set("next", requestedPath);
     return NextResponse.redirect(loginUrl);
   }
 
