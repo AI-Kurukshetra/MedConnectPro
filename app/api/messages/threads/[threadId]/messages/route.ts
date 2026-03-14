@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logAuditEvent } from "@/lib/audit/log";
 
 type MessageChannel = "in_app" | "sms" | "email" | "voice" | "push";
 type MessageDirection = "inbound" | "outbound";
@@ -118,6 +119,29 @@ export async function POST(request: Request, context: { params: Promise<{ thread
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  const { data: thread } = await supabase
+    .from("message_threads")
+    .select("organization_id, patient_id")
+    .eq("id", threadId)
+    .single();
+
+  if (thread?.organization_id) {
+    await logAuditEvent({
+      organizationId: thread.organization_id,
+      actorUserId: user.id,
+      action: "message.created",
+      resourceType: "message",
+      resourceId: data.id,
+      phiAccessed: true,
+      details: {
+        threadId,
+        patientId: thread.patient_id,
+        channel: data.channel,
+        direction: data.direction
+      }
+    });
   }
 
   return NextResponse.json({ data }, { status: 201 });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendSmsWithProvider } from "@/lib/sms/provider";
+import { logAuditEvent } from "@/lib/audit/log";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -102,6 +103,21 @@ export async function POST(request: Request) {
   if (deliveryError) {
     return NextResponse.json({ error: deliveryError.message }, { status: 400 });
   }
+
+  await logAuditEvent({
+    organizationId: thread.organization_id,
+    actorUserId: user.id,
+    action: "message.sms_outbound",
+    resourceType: "message",
+    resourceId: message.id,
+    phiAccessed: true,
+    details: {
+      threadId: thread.id,
+      patientId: thread.patient_id,
+      destination,
+      providerMessageId: providerResponse.providerMessageId
+    }
+  });
 
   return NextResponse.json({
     data: {

@@ -30,3 +30,13 @@
 - feat(api): Added appointment endpoints at `app/api/appointments` and `app/api/appointments/[appointmentId]` for authenticated list/create/read/update flows.
 - fix(api): Mapped provider slot overlap constraint errors (`appointments_provider_no_overlap`) to HTTP 409 conflict responses.
 - feat(api): Added `GET /api/appointments/availability` real-time slot endpoint with provider/day filtering and overlap-aware slot generation.
+- feat(api): Added automated appointment confirmation notification enqueueing to booking (`POST /api/appointments`) via `notification_deliveries`.
+- feat(api): Added reminder generation endpoint `POST /api/reminders/generate` to create reminder jobs from org rules filtered by patient channel preferences.
+- feat(api): Added reminder preference endpoints `GET/PATCH /api/reminders/preferences` for per-patient SMS/email/voice/push channel configuration.
+- feat(ui): Added patient portal dashboard page (`/dashboard/patient`) with upcoming appointments and message thread sections.
+- feat(ui): Added provider dashboard page (`/dashboard/provider`) with message queue, schedule overview, and reminder delivery status.
+- feat(ui): Replaced root dashboard placeholder with responsive navigation cards to patient/provider workspace views.
+- feat(security): Added audit logging helper and wired appointment/message API writes to `audit_logs` for PHI-sensitive operations.
+- feat(api): Added EHR adapter endpoints at `app/api/integrations/ehr/connection` and `app/api/integrations/ehr/sync`.
+- feat(api): Added minimal EHR payload mapping for appointment and communication events before enqueueing `ehr_sync_events`.
+- feat(api): Added notification pipeline endpoints at `app/api/notifications` and `app/api/notifications/dispatch` for queueing and dispatch across SMS/email/voice/push/in-app channels.

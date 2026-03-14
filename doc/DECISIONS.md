@@ -63,3 +63,27 @@
 ## 2026-03-14 - Availability Calculation Uses Booked-Range Exclusion
 - Decision: Compute available appointment slots in API by generating a provider/day slot grid and excluding overlaps against existing `scheduled` and `confirmed` rows.
 - Rationale: Delivers deterministic real-time availability for MVP without introducing background schedulers or additional infrastructure.
+
+## 2026-03-14 - Booking API Enqueues Confirmation Notifications Immediately
+- Decision: On successful appointment creation, enqueue confirmation deliveries across allowed channels using patient contact and preference data.
+- Rationale: Guarantees confirmation workflow is triggered at booking time and keeps downstream channel dispatch decoupled.
+
+## 2026-03-14 - Reminder Generation Applies Both Org Rules and Patient Preferences
+- Decision: Generate reminder jobs only where an enabled org reminder rule exists and the target patient channel preference allows delivery.
+- Rationale: Prevents generating reminder jobs that are invalid for user-configured channels and reduces downstream delivery failures.
+
+## 2026-03-14 - Dashboard UX Split Into Patient and Provider Views
+- Decision: Use dedicated dashboard routes (`/dashboard/patient`, `/dashboard/provider`) with a lightweight root selector page instead of a single mixed dashboard screen.
+- Rationale: Keeps MVP workflows focused per user context and simplifies iteration on role-specific UI blocks.
+
+## 2026-03-14 - Audit Logging Is Best-Effort and Non-Blocking in MVP
+- Decision: Record audit events through service-role inserts where available, but never fail primary API operations solely due to audit write errors.
+- Rationale: Preserves user-facing workflow reliability while still capturing HIPAA-oriented audit trails under normal conditions.
+
+## 2026-03-14 - EHR Sync Is Event-Enqueued With Minimal Canonical Payloads
+- Decision: Adapter writes `ehr_sync_events` with `pending` status using mapped appointment (`Appointment`) and message (`Communication`) payloads instead of synchronous external calls.
+- Rationale: Keeps MVP integration resilient and observable without coupling request latency to third-party EHR availability.
+
+## 2026-03-14 - Notification Pipeline Uses Queue + Dispatcher Endpoints
+- Decision: Split notification handling into enqueue/list (`/api/notifications`) and delivery processing (`/api/notifications/dispatch`) endpoints with channel-specific dispatch behavior.
+- Rationale: Supports multi-channel MVP messaging while allowing later replacement of mocked channel providers without API contract changes.

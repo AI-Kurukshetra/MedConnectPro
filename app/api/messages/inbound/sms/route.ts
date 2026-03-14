@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyWebhookSignature } from "@/lib/sms/security";
+import { logAuditEvent } from "@/lib/audit/log";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -141,6 +142,20 @@ export async function POST(request: Request) {
   if (updateThreadError) {
     return NextResponse.json({ error: updateThreadError.message }, { status: 400 });
   }
+
+  await logAuditEvent({
+    organizationId: body.organizationId,
+    actorUserId: patient.profile_id,
+    action: "message.sms_inbound",
+    resourceType: "message",
+    resourceId: insertedMessage.id,
+    phiAccessed: true,
+    details: {
+      threadId,
+      patientId: patient.id,
+      externalMessageId: insertedMessage.external_message_id
+    }
+  });
 
   return NextResponse.json({ data: insertedMessage }, { status: 201 });
 }

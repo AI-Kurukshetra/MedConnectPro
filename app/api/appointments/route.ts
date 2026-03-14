@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logAuditEvent } from "@/lib/audit/log";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const APPOINTMENT_STATUSES = ["scheduled", "confirmed", "cancelled", "completed", "no_show"] as const;
@@ -15,6 +16,50 @@ type CreateAppointmentBody = {
   notes?: string;
   status?: AppointmentStatus;
 };
+
+type NotificationChannel = "in_app" | "sms" | "email" | "voice" | "push";
+
+type PatientContact = {
+  phone: string | null;
+  email: string | null;
+};
+
+type PatientNotificationPreferences = {
+  allow_sms: boolean;
+  allow_email: boolean;
+  allow_voice: boolean;
+  allow_push: boolean;
+};
+
+function getConfirmationChannels(
+  patient: PatientContact,
+  preferences: PatientNotificationPreferences | null
+): NotificationChannel[] {
+  const channels = new Set<NotificationChannel>(["in_app"]);
+
+  const allowSms = preferences?.allow_sms ?? true;
+  const allowEmail = preferences?.allow_email ?? true;
+  const allowVoice = preferences?.allow_voice ?? false;
+  const allowPush = preferences?.allow_push ?? false;
+
+  if (allowSms && patient.phone) {
+    channels.add("sms");
+  }
+
+  if (allowEmail && patient.email) {
+    channels.add("email");
+  }
+
+  if (allowVoice && patient.phone) {
+    channels.add("voice");
+  }
+
+  if (allowPush) {
+    channels.add("push");
+  }
+
+  return Array.from(channels);
+}
 
 function isUuid(value: string): boolean {
   return UUID_REGEX.test(value);
@@ -168,5 +213,76 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json({ data }, { status: 201 });
+  const { data: patientContact } = await supabase
+    .from("patients")
+    .select("phone, email")
+    .eq("id", body.patientId)
+    .single();
+
+  const { data: notificationPreferences } = await supabase
+    .from("patient_notification_preferences")
+    .select("allow_sms, allow_email, allow_voice, allow_push")
+    .eq("patient_id", body.patientId)
+    .maybeSingle();
+
+  const channels = getConfirmationChannels(
+    {
+      phone: patientContact?.phone ?? null,
+      email: patientContact?.email ?? null
+    },
+    notificationPreferences
+      ? {
+          allow_sms: Boolean(notificationPreferences.allow_sms),
+          allow_email: Boolean(notificationPreferences.allow_email),
+          allow_voice: Boolean(notificationPreferences.allow_voice),
+          allow_push: Boolean(notificationPreferences.allow_push)
+        }
+      : null
+  );
+
+  const notificationRows = channels.map((channel) => ({
+    organization_id: body.organizationId,
+    patient_id: body.patientId,
+    channel,
+    destination: channel === "email" ? patientContact?.email ?? null : patientContact?.phone ?? null,
+    status: "pending",
+    metadata: {
+      notificationType: "appointment_confirmation",
+      appointmentId: data.id,
+      startsAt: data.starts_at,
+      endsAt: data.ends_at
+    }
+  }));
+
+  if (notificationRows.length > 0) {
+    const { error: notificationError } = await supabase.from("notification_deliveries").insert(notificationRows);
+    if (notificationError) {
+      return NextResponse.json(
+        {
+          data,
+          warning: "Appointment created but confirmation notifications failed to enqueue",
+          warningDetails: notificationError.message
+        },
+        { status: 201 }
+      );
+    }
+  }
+
+  await logAuditEvent({
+    organizationId: data.organization_id,
+    actorUserId: user.id,
+    action: "appointment.created",
+    resourceType: "appointment",
+    resourceId: data.id,
+    phiAccessed: true,
+    details: {
+      patientId: data.patient_id,
+      providerUserId: data.provider_user_id,
+      startsAt: data.starts_at,
+      status: data.status,
+      confirmationChannelsQueued: channels
+    }
+  });
+
+  return NextResponse.json({ data, confirmationChannelsQueued: channels }, { status: 201 });
 }
